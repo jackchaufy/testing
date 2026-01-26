@@ -75,6 +75,16 @@ The scraper only saves threads whose titles contain one of these keywords (edita
 uv run run-scraper
 ```
 
+## Admin UI
+
+Run the admin server to view matches in a browser:
+
+```bash
+uv run run-admin
+```
+
+Then open `http://localhost:8000` to see a table of matched threads.
+
 The scraper will:
 
 1. Call the target API URL with Playwright's request context.
