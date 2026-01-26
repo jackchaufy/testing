@@ -12,6 +12,11 @@ DEFAULT_HEADERS = {
     "Accept-Language": "en-US,en;q=0.9",
     "Referer": "https://lihkg.com/",
 }
+DEFAULT_TITLE_KEYWORDS = [
+    "最有價值收息股研究所",
+    "ASPI",
+    "美日韓 超長線十倍價投",
+]
 
 
 def get_target_url() -> str:
@@ -28,3 +33,7 @@ def get_db_path() -> Path:
 
 def get_request_headers() -> dict[str, str]:
     return DEFAULT_HEADERS.copy()
+
+
+def get_title_keywords() -> list[str]:
+    return list(DEFAULT_TITLE_KEYWORDS)

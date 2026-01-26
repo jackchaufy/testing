@@ -62,6 +62,13 @@ Accept-Language: en-US,en;q=0.9
 Referer: https://lihkg.com/
 ```
 
+The scraper only saves threads whose titles contain one of these keywords (editable in
+`config.py`):
+
+- `最有價值收息股研究所`
+- `ASPI`
+- `美日韓 超長線十倍價投`
+
 ## Run
 
 ```bash
@@ -71,5 +78,6 @@ uv run run-scraper
 The scraper will:
 
 1. Call the target API URL with Playwright's request context.
-2. Store the HTTP status code and response body in SQLite.
+2. Filter response items by title keywords (configured in `config.py`).
+3. Store matching thread IDs, titles, and JSON payloads in SQLite.
 4. Wait for the configured interval and repeat.
