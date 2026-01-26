@@ -23,7 +23,14 @@ async def run_periodic() -> None:
 
 
 def main() -> None:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s",
+        handlers=[
+            logging.FileHandler("data/scraper.log", encoding="utf-8"),
+            logging.StreamHandler(),
+        ],
+    )
     asyncio.run(run_periodic())
 
 

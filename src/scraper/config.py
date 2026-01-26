@@ -4,7 +4,7 @@ from pathlib import Path
 DEFAULT_TARGET_URL = (
     "https://lihkg.com/api_v2/thread/category?cat_id=15&page=1&count=60&type=now"
 )
-DEFAULT_INTERVAL_SECONDS = 300
+DEFAULT_INTERVAL_SECONDS = 3
 DEFAULT_DB_PATH = Path("data/scraper.db")
 DEFAULT_HEADERS = {
     "User-Agent": "Mozilla/5.0",
