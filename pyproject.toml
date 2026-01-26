@@ -1,0 +1,15 @@
+[project]
+name = "periodic-web-scraper"
+version = "0.1.0"
+description = "Periodic web scraping with Playwright and SQLite"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "playwright>=1.41.0",
+]
+
+[project.scripts]
+run-scraper = "scraper.app:main"
+
+[tool.uv]
+package = true
