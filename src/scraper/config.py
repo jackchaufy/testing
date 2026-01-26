@@ -7,10 +7,14 @@ DEFAULT_TARGET_URL = (
 DEFAULT_INTERVAL_SECONDS = 3
 DEFAULT_DB_PATH = Path("data/scraper.db")
 DEFAULT_HEADERS = {
-    "User-Agent": "Mozilla/5.0",
+    "User-Agent": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
+    ),
     "Accept": "application/json, text/plain, */*",
     "Accept-Language": "en-US,en;q=0.9",
     "Referer": "https://lihkg.com/",
+    "Origin": "https://lihkg.com",
 }
 DEFAULT_TITLE_KEYWORDS = [
     "最有價值收息股研究所",

@@ -56,10 +56,11 @@ export SCRAPER_DB_PATH="data/scraper.db"
 Default request headers (configurable in `config.py`) match the provided curl example:
 
 ```text
-User-Agent: Mozilla/5.0
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36
 Accept: application/json, text/plain, */*
 Accept-Language: en-US,en;q=0.9
 Referer: https://lihkg.com/
+Origin: https://lihkg.com
 ```
 
 The scraper only saves threads whose titles contain one of these keywords (editable in
