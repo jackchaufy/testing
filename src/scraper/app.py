@@ -2,7 +2,7 @@ import asyncio
 
 from scraper.config import get_db_path, get_interval_seconds, get_target_url
 from scraper.db import init_db
-from scraper.scrape import scrape_title
+from scraper.scrape import scrape_api
 
 
 async def run_periodic() -> None:
@@ -13,7 +13,7 @@ async def run_periodic() -> None:
     interval = get_interval_seconds()
 
     while True:
-        await scrape_title(db_path, url)
+        await scrape_api(db_path, url)
         await asyncio.sleep(interval)
 
 

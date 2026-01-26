@@ -1,6 +1,6 @@
 # Periodic Web Scraper
 
-This project provides a minimal folder structure for a periodic web scraper that:
+This project provides a minimal folder structure for a periodic API scraper that:
 
 - Uses **Playwright** for browser automation.
 - Stores results in **SQLite**.
@@ -41,16 +41,25 @@ uv run playwright install
 
 The scraper reads settings from environment variables (defaults in `config.py`):
 
-- `SCRAPER_TARGET_URL` (default: `https://example.com`)
+- `SCRAPER_TARGET_URL` (default: the LIHKG API URL shown below)
 - `SCRAPER_INTERVAL_SECONDS` (default: `300`)
 - `SCRAPER_DB_PATH` (default: `data/scraper.db`)
 
 Example:
 
 ```bash
-export SCRAPER_TARGET_URL="https://example.com"
+export SCRAPER_TARGET_URL="https://lihkg.com/api_v2/thread/category?cat_id=15&page=1&count=60&type=now"
 export SCRAPER_INTERVAL_SECONDS=120
 export SCRAPER_DB_PATH="data/scraper.db"
+```
+
+Default request headers (configurable in `config.py`) match the provided curl example:
+
+```text
+User-Agent: Mozilla/5.0
+Accept: application/json, text/plain, */*
+Accept-Language: en-US,en;q=0.9
+Referer: https://lihkg.com/
 ```
 
 ## Run
@@ -61,7 +70,6 @@ uv run run-scraper
 
 The scraper will:
 
-1. Open the target URL.
-2. Extract the page title and timestamp.
-3. Store results in SQLite.
+1. Call the target API URL with Playwright's request context.
+2. Store the HTTP status code and response body in SQLite.
 4. Wait for the configured interval and repeat.
