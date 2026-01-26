@@ -18,6 +18,37 @@ def init_db(db_path: Path) -> None:
             )
             """
         )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS user_comments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                scraped_at TEXT NOT NULL,
+                thread_id INTEGER NOT NULL,
+                page INTEGER NOT NULL,
+                post_id TEXT NOT NULL,
+                user_id INTEGER NOT NULL,
+                user_nickname TEXT NOT NULL,
+                msg TEXT NOT NULL,
+                payload TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS stock_comments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                scraped_at TEXT NOT NULL,
+                stock TEXT NOT NULL,
+                thread_id INTEGER NOT NULL,
+                page INTEGER NOT NULL,
+                post_id TEXT NOT NULL,
+                user_id INTEGER NOT NULL,
+                user_nickname TEXT NOT NULL,
+                msg TEXT NOT NULL,
+                payload TEXT NOT NULL
+            )
+            """
+        )
         conn.commit()
 
 
@@ -40,3 +71,60 @@ def fetch_matches(db_path: Path) -> Iterable[tuple[int, str, str, int, str, str]
             " FROM thread_matches ORDER BY id DESC"
         ).fetchall()
     return rows
+
+
+def insert_user_comment(
+    db_path: Path,
+    scraped_at: str,
+    thread_id: int,
+    page: int,
+    post_id: str,
+    user_id: int,
+    user_nickname: str,
+    msg: str,
+    payload: str,
+) -> None:
+    with sqlite3.connect(db_path) as conn:
+        conn.execute(
+            """
+            INSERT INTO user_comments
+            (scraped_at, thread_id, page, post_id, user_id, user_nickname, msg, payload)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (scraped_at, thread_id, page, post_id, user_id, user_nickname, msg, payload),
+        )
+        conn.commit()
+
+
+def insert_stock_comment(
+    db_path: Path,
+    scraped_at: str,
+    stock: str,
+    thread_id: int,
+    page: int,
+    post_id: str,
+    user_id: int,
+    user_nickname: str,
+    msg: str,
+    payload: str,
+) -> None:
+    with sqlite3.connect(db_path) as conn:
+        conn.execute(
+            """
+            INSERT INTO stock_comments
+            (scraped_at, stock, thread_id, page, post_id, user_id, user_nickname, msg, payload)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                scraped_at,
+                stock,
+                thread_id,
+                page,
+                post_id,
+                user_id,
+                user_nickname,
+                msg,
+                payload,
+            ),
+        )
+        conn.commit()

@@ -17,6 +17,13 @@ DEFAULT_TITLE_KEYWORDS = [
     "ASPI",
     "美日韓 超長線十倍價投",
 ]
+DEFAULT_STOCK_KEYWORDS = [
+    "最有價值收息股研究所",
+    "ASPI",
+    "美日韓 超長線十倍價投",
+]
+DEFAULT_TARGET_USER_ID = 734436
+THREAD_URL_TEMPLATE = "https://lihkg.com/api_v2/thread/{thread_id}/page/{page}"
 
 
 def get_target_url() -> str:
@@ -37,3 +44,15 @@ def get_request_headers() -> dict[str, str]:
 
 def get_title_keywords() -> list[str]:
     return list(DEFAULT_TITLE_KEYWORDS)
+
+
+def get_stock_keywords() -> list[str]:
+    return list(DEFAULT_STOCK_KEYWORDS)
+
+
+def get_target_user_id() -> int:
+    return DEFAULT_TARGET_USER_ID
+
+
+def get_thread_url(thread_id: int, page: int) -> str:
+    return THREAD_URL_TEMPLATE.format(thread_id=thread_id, page=page)

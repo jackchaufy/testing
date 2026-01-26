@@ -69,6 +69,12 @@ The scraper only saves threads whose titles contain one of these keywords (edita
 - `ASPI`
 - `美日韓 超長線十倍價投`
 
+When a thread title matches, the scraper fetches each thread page from the LIHKG
+thread API (`/api_v2/thread/{thread_id}/page/{page}`) and stores:
+
+- All comments from `user_id=734436` in the `user_comments` table.
+- Any comments whose message contains a stock keyword in the `stock_comments` table.
+
 ## Run
 
 ```bash
