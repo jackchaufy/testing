@@ -14,7 +14,8 @@ def init_db(db_path: Path) -> None:
                 url TEXT NOT NULL,
                 thread_id INTEGER NOT NULL,
                 title TEXT NOT NULL,
-                payload TEXT NOT NULL
+                payload TEXT NOT NULL,
+                UNIQUE(thread_id, title)
             )
             """
         )
@@ -29,7 +30,8 @@ def init_db(db_path: Path) -> None:
                 user_id INTEGER NOT NULL,
                 user_nickname TEXT NOT NULL,
                 msg TEXT NOT NULL,
-                payload TEXT NOT NULL
+                payload TEXT NOT NULL,
+                UNIQUE(thread_id, post_id)
             )
             """
         )
@@ -45,7 +47,8 @@ def init_db(db_path: Path) -> None:
                 user_id INTEGER NOT NULL,
                 user_nickname TEXT NOT NULL,
                 msg TEXT NOT NULL,
-                payload TEXT NOT NULL
+                payload TEXT NOT NULL,
+                UNIQUE(stock, thread_id, post_id)
             )
             """
         )
@@ -57,7 +60,8 @@ def insert_match(
 ) -> None:
     with sqlite3.connect(db_path) as conn:
         conn.execute(
-            "INSERT INTO thread_matches (scraped_at, url, thread_id, title, payload)"
+            "INSERT OR IGNORE INTO thread_matches"
+            " (scraped_at, url, thread_id, title, payload)"
             " VALUES (?, ?, ?, ?, ?)",
             (scraped_at, url, thread_id, title, payload),
         )
@@ -87,7 +91,7 @@ def insert_user_comment(
     with sqlite3.connect(db_path) as conn:
         conn.execute(
             """
-            INSERT INTO user_comments
+            INSERT OR IGNORE INTO user_comments
             (scraped_at, thread_id, page, post_id, user_id, user_nickname, msg, payload)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
@@ -111,7 +115,7 @@ def insert_stock_comment(
     with sqlite3.connect(db_path) as conn:
         conn.execute(
             """
-            INSERT INTO stock_comments
+            INSERT OR IGNORE INTO stock_comments
             (scraped_at, stock, thread_id, page, post_id, user_id, user_nickname, msg, payload)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
@@ -127,4 +131,10 @@ def insert_stock_comment(
                 payload,
             ),
         )
+        conn.commit()
+
+
+def delete_match(db_path: Path, match_id: int) -> None:
+    with sqlite3.connect(db_path) as conn:
+        conn.execute("DELETE FROM thread_matches WHERE id = ?", (match_id,))
         conn.commit()

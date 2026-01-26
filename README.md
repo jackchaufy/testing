@@ -90,6 +90,7 @@ uv run run-admin
 ```
 
 Then open `http://localhost:8000` to see a table of matched threads.
+Use the Delete button on each row to remove a stored match.
 
 The scraper will:
 

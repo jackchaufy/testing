@@ -5,9 +5,10 @@ import json
 
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
+from starlette.responses import RedirectResponse
 
 from scraper.config import get_db_path
-from scraper.db import fetch_matches
+from scraper.db import delete_match, fetch_matches
 
 app = FastAPI(title="Scraper Admin")
 
@@ -43,6 +44,7 @@ def index() -> str:
               <th>Thread ID</th>
               <th>Title</th>
               <th>Payload</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -52,6 +54,13 @@ def index() -> str:
       </body>
     </html>
     """
+
+
+@app.post("/delete/{match_id}")
+def delete_match_row(match_id: int) -> RedirectResponse:
+    db_path = get_db_path()
+    delete_match(db_path, match_id)
+    return RedirectResponse(url="/", status_code=303)
 
 
 def _render_row(
@@ -68,6 +77,11 @@ def _render_row(
         f"<td>{thread_id}</td>"
         f"<td>{safe_title}</td>"
         f"<td><pre>{formatted_payload}</pre></td>"
+        "<td>"
+        f"<form method='post' action='/delete/{row_id}'>"
+        "<button type='submit'>Delete</button>"
+        "</form>"
+        "</td>"
         "</tr>"
     )
 
