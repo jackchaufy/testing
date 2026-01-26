@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import logging
+import asyncio
 
 from playwright.async_api import async_playwright
 
@@ -56,6 +57,7 @@ async def _scrape_thread(db_path, thread_id: int, scraped_at: str) -> None:
         LOGGER.info("Scraping thread pages", extra={"thread_id": thread_id})
         await scrape_thread_pages(db_path, request, thread_id, scraped_at)
         await request.dispose()
+    await asyncio.sleep(3)
 
 
 async def scrape_thread_pages(db_path, request, thread_id: int, scraped_at: str) -> None:
