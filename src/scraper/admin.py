@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import html
+import json
+
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
@@ -14,8 +17,7 @@ def index() -> str:
     db_path = get_db_path()
     rows = fetch_matches(db_path)
     table_rows = "\n".join(
-        f"<tr><td>{row_id}</td><td>{scraped_at}</td><td>{url}</td>"
-        f"<td>{thread_id}</td><td>{title}</td><td><pre>{payload}</pre></td></tr>"
+        _render_row(row_id, scraped_at, url, thread_id, title, payload)
         for row_id, scraped_at, url, thread_id, title, payload in rows
     )
     return f"""
@@ -50,6 +52,32 @@ def index() -> str:
       </body>
     </html>
     """
+
+
+def _render_row(
+    row_id: int, scraped_at: str, url: str, thread_id: int, title: str, payload: str
+) -> str:
+    safe_title = html.escape(title)
+    safe_url = html.escape(url)
+    formatted_payload = _format_payload(payload)
+    return (
+        "<tr>"
+        f"<td>{row_id}</td>"
+        f"<td>{scraped_at}</td>"
+        f"<td>{safe_url}</td>"
+        f"<td>{thread_id}</td>"
+        f"<td>{safe_title}</td>"
+        f"<td><pre>{formatted_payload}</pre></td>"
+        "</tr>"
+    )
+
+
+def _format_payload(payload: str) -> str:
+    try:
+        parsed = json.loads(payload)
+    except json.JSONDecodeError:
+        return html.escape(payload)
+    return html.escape(json.dumps(parsed, ensure_ascii=False, indent=2))
 
 
 def main() -> None:
