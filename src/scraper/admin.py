@@ -56,6 +56,53 @@ def index() -> str:
     """
 
 
+@app.get("/user-comments", response_class=HTMLResponse)
+def user_comments() -> str:
+    db_path = get_db_path()
+    rows = _fetch_user_comments(db_path)
+    table_rows = "\n".join(
+        _render_user_comment_row(*row) for row in rows
+    )
+    return _render_table_page(
+        "User Comments",
+        [
+            "ID",
+            "Scraped At",
+            "Thread ID",
+            "Page",
+            "Post ID",
+            "User ID",
+            "User Nickname",
+            "Message",
+        ],
+        table_rows,
+    )
+
+
+@app.get("/stock-comments", response_class=HTMLResponse)
+def stock_comments() -> str:
+    db_path = get_db_path()
+    rows = _fetch_stock_comments(db_path)
+    table_rows = "\n".join(
+        _render_stock_comment_row(*row) for row in rows
+    )
+    return _render_table_page(
+        "Stock Comments",
+        [
+            "ID",
+            "Scraped At",
+            "Stock",
+            "Thread ID",
+            "Page",
+            "Post ID",
+            "User ID",
+            "User Nickname",
+            "Message",
+        ],
+        table_rows,
+    )
+
+
 @app.post("/delete/{match_id}")
 def delete_match_row(match_id: int) -> RedirectResponse:
     db_path = get_db_path()
@@ -82,6 +129,113 @@ def _render_row(
         "<button type='submit'>Delete</button>"
         "</form>"
         "</td>"
+        "</tr>"
+    )
+
+
+def _render_table_page(title: str, headers: list[str], rows_html: str) -> str:
+    header_cells = "".join(f"<th>{html.escape(header)}</th>" for header in headers)
+    return f"""
+    <html>
+      <head>
+        <title>{html.escape(title)}</title>
+        <style>
+          body {{ font-family: Arial, sans-serif; margin: 24px; }}
+          table {{ border-collapse: collapse; width: 100%; }}
+          th, td {{ border: 1px solid #ddd; padding: 8px; vertical-align: top; }}
+          th {{ background-color: #f4f4f4; }}
+          pre {{ margin: 0; white-space: pre-wrap; word-break: break-word; }}
+        </style>
+      </head>
+      <body>
+        <h1>{html.escape(title)}</h1>
+        <table>
+          <thead>
+            <tr>
+              {header_cells}
+            </tr>
+          </thead>
+          <tbody>
+            {rows_html}
+          </tbody>
+        </table>
+      </body>
+    </html>
+    """
+
+
+def _fetch_user_comments(db_path):
+    import sqlite3
+
+    with sqlite3.connect(db_path) as conn:
+        return conn.execute(
+            """
+            SELECT id, scraped_at, thread_id, page, post_id, user_id, user_nickname, msg
+            FROM user_comments
+            ORDER BY id DESC
+            """
+        ).fetchall()
+
+
+def _fetch_stock_comments(db_path):
+    import sqlite3
+
+    with sqlite3.connect(db_path) as conn:
+        return conn.execute(
+            """
+            SELECT id, scraped_at, stock, thread_id, page, post_id, user_id, user_nickname, msg
+            FROM stock_comments
+            ORDER BY id DESC
+            """
+        ).fetchall()
+
+
+def _render_user_comment_row(
+    row_id: int,
+    scraped_at: str,
+    thread_id: int,
+    page: int,
+    post_id: str,
+    user_id: int,
+    user_nickname: str,
+    msg: str,
+) -> str:
+    return (
+        "<tr>"
+        f"<td>{row_id}</td>"
+        f"<td>{scraped_at}</td>"
+        f"<td>{thread_id}</td>"
+        f"<td>{page}</td>"
+        f"<td>{html.escape(post_id)}</td>"
+        f"<td>{user_id}</td>"
+        f"<td>{html.escape(user_nickname)}</td>"
+        f"<td><pre>{html.escape(msg)}</pre></td>"
+        "</tr>"
+    )
+
+
+def _render_stock_comment_row(
+    row_id: int,
+    scraped_at: str,
+    stock: str,
+    thread_id: int,
+    page: int,
+    post_id: str,
+    user_id: int,
+    user_nickname: str,
+    msg: str,
+) -> str:
+    return (
+        "<tr>"
+        f"<td>{row_id}</td>"
+        f"<td>{scraped_at}</td>"
+        f"<td>{html.escape(stock)}</td>"
+        f"<td>{thread_id}</td>"
+        f"<td>{page}</td>"
+        f"<td>{html.escape(post_id)}</td>"
+        f"<td>{user_id}</td>"
+        f"<td>{html.escape(user_nickname)}</td>"
+        f"<td><pre>{html.escape(msg)}</pre></td>"
         "</tr>"
     )
 

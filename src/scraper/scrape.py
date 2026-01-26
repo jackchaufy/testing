@@ -25,6 +25,7 @@ async def scrape_api(db_path, url: str) -> int:
             await request.dispose()
             return 0
         body = await response.text()
+        await request.dispose()
 
     scraped_at = dt.datetime.utcnow().isoformat()
     payload = json.loads(body)
@@ -37,10 +38,18 @@ async def scrape_api(db_path, url: str) -> int:
             continue
         thread_id = int(item.get("thread_id", 0))
         insert_match(db_path, scraped_at, url, thread_id, title, json.dumps(item))
-        await scrape_thread_pages(db_path, request, thread_id, scraped_at)
+        await _scrape_thread(db_path, thread_id, scraped_at)
         matches += 1
-    await request.dispose()
     return matches
+
+
+async def _scrape_thread(db_path, thread_id: int, scraped_at: str) -> None:
+    async with async_playwright() as playwright:
+        request = await playwright.request.new_context(
+            extra_http_headers=get_request_headers()
+        )
+        await scrape_thread_pages(db_path, request, thread_id, scraped_at)
+        await request.dispose()
 
 
 async def scrape_thread_pages(db_path, request, thread_id: int, scraped_at: str) -> None:

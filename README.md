@@ -42,14 +42,14 @@ uv run playwright install
 The scraper reads settings from environment variables (defaults in `config.py`):
 
 - `SCRAPER_TARGET_URL` (default: the LIHKG API URL shown below)
-- `SCRAPER_INTERVAL_SECONDS` (default: `3`)
+- `SCRAPER_INTERVAL_SECONDS` (default: `60`)
 - `SCRAPER_DB_PATH` (default: `data/scraper.db`)
 
 Example:
 
 ```bash
 export SCRAPER_TARGET_URL="https://lihkg.com/api_v2/thread/category?cat_id=15&page=1&count=60&type=now"
-export SCRAPER_INTERVAL_SECONDS=3
+export SCRAPER_INTERVAL_SECONDS=60
 export SCRAPER_DB_PATH="data/scraper.db"
 ```
 
@@ -94,6 +94,10 @@ uv run run-admin
 
 Then open `http://localhost:8000` to see a table of matched threads.
 Use the Delete button on each row to remove a stored match.
+Additional pages:
+
+- `http://localhost:8000/user-comments` for comments from the target user.
+- `http://localhost:8000/stock-comments` for comments grouped by stock keywords.
 
 The scraper will:
 
