@@ -10,12 +10,10 @@ from typing import Any, Dict, List
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from langchain.agents import create_openai_functions_agent
-from langchain.agents.agent import AgentExecutor
-from langchain_core.messages import AIMessage, HumanMessage
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
 
 def load_env() -> None:
     env_path = Path(__file__).resolve().parents[1] / ".env"
@@ -132,21 +130,6 @@ def chat(payload: Dict[str, Any]) -> Dict[str, Any]:
     enabled_tools = [tool_ for tool_ in TOOLS if TOOL_STATE.get(tool_.name, False)]
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            (
-                "system",
-                "You are a helpful agent that can use tools to answer questions.",
-            ),
-            MessagesPlaceholder(variable_name="chat_history"),
-            ("human", "{input}"),
-            MessagesPlaceholder(variable_name="agent_scratchpad"),
-        ]
-    )
-
-    agent = create_openai_functions_agent(llm, enabled_tools, prompt)
-    executor = AgentExecutor(agent=agent, tools=enabled_tools, verbose=False)
-
     chat_history = []
     for entry in history:
         if entry.get("role") == "user":
@@ -154,12 +137,27 @@ def chat(payload: Dict[str, Any]) -> Dict[str, Any]:
         elif entry.get("role") == "assistant":
             chat_history.append(AIMessage(content=entry.get("content", "")))
 
-    result = executor.invoke({"input": message, "chat_history": chat_history})
+    system_message = SystemMessage(
+        content="You are a helpful agent that can use tools to answer questions."
+    )
 
-    tool_usage = [
-        step[1].tool
-        for step in result.get("intermediate_steps", [])
-        if step and step[1]
-    ]
+    agent = create_react_agent(llm, enabled_tools)
+    result = agent.invoke(
+        {"messages": [system_message, *chat_history, HumanMessage(content=message)]}
+    )
 
-    return {"reply": result.get("output", ""), "tool_usage": tool_usage}
+    messages = result.get("messages", [])
+    reply = messages[-1].content if messages else ""
+
+    tool_usage = []
+    for message_item in messages:
+        if isinstance(message_item, AIMessage):
+            for tool_call in message_item.tool_calls or []:
+                if isinstance(tool_call, dict):
+                    name = tool_call.get("name")
+                else:
+                    name = getattr(tool_call, "name", None)
+                if name:
+                    tool_usage.append(name)
+
+    return {"reply": reply, "tool_usage": tool_usage}
