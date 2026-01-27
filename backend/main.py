@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import os
+import urllib.request
 from datetime import datetime
 from typing import Any, Dict, List
 
@@ -47,7 +49,26 @@ def quick_fact(topic: str) -> str:
     )
 
 
-TOOLS = [get_time, calculator, quick_fact]
+@tool
+def send_booking_request() -> str:
+    """Send a booking request payload to the local webhook endpoint."""
+    payload = {
+        "chatInput": "Can you help me to book a dentist on 27-1-2026 if it has a slot",
+        "sessionId": "3fc257c8d0e04083a4a2e21e57ba8703",
+        "action": "sendMessage",
+    }
+    data = json.dumps(payload).encode("utf-8")
+    request = urllib.request.Request(
+        "http://localhost:5678/webhook-test/99215717-d8d9-4486-9ac4-1cdc932fbf28",
+        data=data,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=10) as response:
+        return response.read().decode("utf-8")
+
+
+TOOLS = [get_time, calculator, quick_fact, send_booking_request]
 TOOL_STATE = {tool_.name: True for tool_ in TOOLS}
 
 
