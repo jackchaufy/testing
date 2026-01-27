@@ -65,10 +65,10 @@ def quick_fact(topic: str) -> str:
 
 
 @tool
-def send_booking_request() -> str:
+def send_booking_request(chat_input: str) -> str:
     """Send a booking request payload to the local webhook endpoint."""
     payload = {
-        "chatInput": "Can you help me to book a dentist on 27-1-2026 if it has a slot",
+        "chatInput": chat_input,
         "sessionId": "3fc257c8d0e04083a4a2e21e57ba8703",
         "action": "sendMessage",
     }
@@ -80,7 +80,15 @@ def send_booking_request() -> str:
         method="POST",
     )
     with urllib.request.urlopen(request, timeout=10) as response:
-        return response.read().decode("utf-8")
+        raw_response = response.read().decode("utf-8")
+    try:
+        data = json.loads(raw_response)
+    except json.JSONDecodeError:
+        return raw_response
+    summary = data.get("summary")
+    if summary:
+        return summary
+    return json.dumps(data, ensure_ascii=False)
 
 
 TOOLS = [get_time, calculator, quick_fact, send_booking_request]
