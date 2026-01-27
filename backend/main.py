@@ -74,7 +74,7 @@ def send_booking_request(chat_input: str) -> str:
     }
     data = json.dumps(payload).encode("utf-8")
     request = urllib.request.Request(
-        "http://localhost:5678/webhook-test/99215717-d8d9-4486-9ac4-1cdc932fbf28",
+        "http://localhost:5678/webhook/99215717-d8d9-4486-9ac4-1cdc932fbf28",
         data=data,
         headers={"Content-Type": "application/json"},
         method="POST",
@@ -85,9 +85,15 @@ def send_booking_request(chat_input: str) -> str:
         data = json.loads(raw_response)
     except json.JSONDecodeError:
         return raw_response
-    summary = data.get("summary")
-    if summary:
-        return summary
+    output_payload = data
+    if isinstance(data, list) and data:
+        output_payload = data[0]
+    if isinstance(output_payload, dict):
+        output_payload = output_payload.get("output", output_payload)
+        if isinstance(output_payload, dict):
+            summary = output_payload.get("summary")
+            if summary:
+                return summary
     return json.dumps(data, ensure_ascii=False)
 
 
