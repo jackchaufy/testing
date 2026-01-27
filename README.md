@@ -11,9 +11,13 @@ agent that can call multiple tools and be controlled from a web UI.
    source .venv/bin/activate
    pip install -r requirements.txt
    ```
-2. Set your OpenAI API key:
+2. Set your OpenAI API key (either export it or put it in `.env`):
    ```bash
    export OPENAI_API_KEY=your-key
+   ```
+   Or edit `.env` with your key:
+   ```bash
+   OPENAI_API_KEY=your-key
    ```
 3. Start the API server:
    ```bash
