@@ -10,7 +10,8 @@ from typing import Any, Dict, List
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from langchain.agents import AgentExecutor, create_openai_functions_agent
+from langchain.agents import create_openai_functions_agent
+from langchain.agents.agent import AgentExecutor
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.tools import tool
