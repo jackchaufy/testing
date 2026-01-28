@@ -61,6 +61,7 @@ def user_comments() -> str:
             "Post ID",
             "User ID",
             "User Nickname",
+            "Reply Time",
             "Message",
         ],
         table_rows,
@@ -85,6 +86,7 @@ def stock_comments() -> str:
             "Post ID",
             "User ID",
             "User Nickname",
+            "Reply Time",
             "Message",
         ],
         table_rows,
@@ -169,7 +171,7 @@ def _fetch_user_comments(db_path):
     with sqlite3.connect(db_path) as conn:
         return conn.execute(
             """
-            SELECT id, scraped_at, thread_id, page, post_id, user_id, user_nickname, msg
+            SELECT id, scraped_at, thread_id, page, post_id, user_id, user_nickname, reply_time, msg
             FROM user_comments
             ORDER BY id DESC
             """
@@ -182,7 +184,7 @@ def _fetch_stock_comments(db_path):
     with sqlite3.connect(db_path) as conn:
         return conn.execute(
             """
-            SELECT id, scraped_at, stock, thread_id, page, post_id, user_id, user_nickname, msg
+            SELECT id, scraped_at, stock, thread_id, page, post_id, user_id, user_nickname, reply_time, msg
             FROM stock_comments
             ORDER BY id DESC
             """
@@ -197,6 +199,7 @@ def _render_user_comment_row(
     post_id: str,
     user_id: int,
     user_nickname: str,
+    reply_time: int,
     msg: str,
 ) -> str:
     return (
@@ -208,6 +211,7 @@ def _render_user_comment_row(
         f"<td>{html.escape(post_id)}</td>"
         f"<td>{user_id}</td>"
         f"<td>{html.escape(user_nickname)}</td>"
+        f"<td>{reply_time}</td>"
         f"<td><pre>{html.escape(msg)}</pre></td>"
         "</tr>"
     )
@@ -222,6 +226,7 @@ def _render_stock_comment_row(
     post_id: str,
     user_id: int,
     user_nickname: str,
+    reply_time: int,
     msg: str,
 ) -> str:
     return (
@@ -234,6 +239,7 @@ def _render_stock_comment_row(
         f"<td>{html.escape(post_id)}</td>"
         f"<td>{user_id}</td>"
         f"<td>{html.escape(user_nickname)}</td>"
+        f"<td>{reply_time}</td>"
         f"<td><pre>{html.escape(msg)}</pre></td>"
         "</tr>"
     )

@@ -104,6 +104,7 @@ def _process_thread_page(
         user_id = int(item.get("user_id", 0))
         post_id = str(item.get("post_id", ""))
         user_nickname = str(item.get("user_nickname", ""))
+        reply_time = int(item.get("reply_time", 0))
         msg = str(item.get("msg", ""))
         if user_id == target_user_id:
             insert_user_comment(
@@ -114,6 +115,7 @@ def _process_thread_page(
                 post_id,
                 user_id,
                 user_nickname,
+                reply_time,
                 msg,
                 json.dumps(item, ensure_ascii=False),
             )
@@ -132,6 +134,7 @@ def _process_thread_page(
                     post_id,
                     user_id,
                     user_nickname,
+                    reply_time,
                     msg,
                     json.dumps(item, ensure_ascii=False),
                 )

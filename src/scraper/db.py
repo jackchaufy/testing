@@ -29,6 +29,7 @@ def init_db(db_path: Path) -> None:
                 post_id TEXT NOT NULL,
                 user_id INTEGER NOT NULL,
                 user_nickname TEXT NOT NULL,
+                reply_time INTEGER NOT NULL,
                 msg TEXT NOT NULL,
                 payload TEXT NOT NULL,
                 UNIQUE(thread_id, post_id)
@@ -46,6 +47,7 @@ def init_db(db_path: Path) -> None:
                 post_id TEXT NOT NULL,
                 user_id INTEGER NOT NULL,
                 user_nickname TEXT NOT NULL,
+                reply_time INTEGER NOT NULL,
                 msg TEXT NOT NULL,
                 payload TEXT NOT NULL,
                 UNIQUE(stock, thread_id, post_id)
@@ -85,6 +87,7 @@ def insert_user_comment(
     post_id: str,
     user_id: int,
     user_nickname: str,
+    reply_time: int,
     msg: str,
     payload: str,
 ) -> None:
@@ -92,10 +95,20 @@ def insert_user_comment(
         conn.execute(
             """
             INSERT OR IGNORE INTO user_comments
-            (scraped_at, thread_id, page, post_id, user_id, user_nickname, msg, payload)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            (scraped_at, thread_id, page, post_id, user_id, user_nickname, reply_time, msg, payload)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (scraped_at, thread_id, page, post_id, user_id, user_nickname, msg, payload),
+            (
+                scraped_at,
+                thread_id,
+                page,
+                post_id,
+                user_id,
+                user_nickname,
+                reply_time,
+                msg,
+                payload,
+            ),
         )
         conn.commit()
 
@@ -109,6 +122,7 @@ def insert_stock_comment(
     post_id: str,
     user_id: int,
     user_nickname: str,
+    reply_time: int,
     msg: str,
     payload: str,
 ) -> None:
@@ -116,8 +130,8 @@ def insert_stock_comment(
         conn.execute(
             """
             INSERT OR IGNORE INTO stock_comments
-            (scraped_at, stock, thread_id, page, post_id, user_id, user_nickname, msg, payload)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (scraped_at, stock, thread_id, page, post_id, user_id, user_nickname, reply_time, msg, payload)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 scraped_at,
@@ -127,6 +141,7 @@ def insert_stock_comment(
                 post_id,
                 user_id,
                 user_nickname,
+                reply_time,
                 msg,
                 payload,
             ),
