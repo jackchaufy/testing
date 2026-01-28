@@ -15,7 +15,7 @@ def init_db(db_path: Path) -> None:
                 thread_id INTEGER NOT NULL,
                 title TEXT NOT NULL,
                 payload TEXT NOT NULL,
-                UNIQUE(thread_id, title)
+                UNIQUE(thread_id)
             )
             """
         )
