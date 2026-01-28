@@ -1,0 +1,14 @@
+README.md
+pyproject.toml
+src/periodic_web_scraper.egg-info/PKG-INFO
+src/periodic_web_scraper.egg-info/SOURCES.txt
+src/periodic_web_scraper.egg-info/dependency_links.txt
+src/periodic_web_scraper.egg-info/entry_points.txt
+src/periodic_web_scraper.egg-info/requires.txt
+src/periodic_web_scraper.egg-info/top_level.txt
+src/scraper/__init__.py
+src/scraper/admin.py
+src/scraper/app.py
+src/scraper/config.py
+src/scraper/db.py
+src/scraper/scrape.py

@@ -18,7 +18,7 @@ DEFAULT_HEADERS = {
 }
 DEFAULT_TITLE_KEYWORDS = [
     "最有價值收息股研究所",
-    "ASPI",
+    # "ASPI",
     "美日韓 超長線十倍價投",
 ]
 DEFAULT_STOCK_KEYWORDS = [
@@ -28,7 +28,6 @@ DEFAULT_STOCK_KEYWORDS = [
 ]
 DEFAULT_TARGET_USER_ID = 734436
 THREAD_URL_TEMPLATE = "https://lihkg.com/api_v2/thread/{thread_id}/page/{page}"
-
 
 def get_target_url() -> str:
     return os.getenv("SCRAPER_TARGET_URL", DEFAULT_TARGET_URL)

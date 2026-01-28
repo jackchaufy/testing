@@ -4,6 +4,7 @@ import datetime as dt
 import json
 import logging
 import asyncio
+import random
 
 from playwright.async_api import async_playwright
 
@@ -19,6 +20,7 @@ from scraper.db import insert_match, insert_stock_comment, insert_user_comment
 LOGGER = logging.getLogger(__name__)
 
 async def scrape_api(db_path, url: str) -> int:
+    random.randint(5, 10)
     async with async_playwright() as playwright:
         request = await playwright.request.new_context(
             extra_http_headers=get_request_headers()
@@ -26,6 +28,7 @@ async def scrape_api(db_path, url: str) -> int:
         response = await request.get(url)
         if not response.ok:
             LOGGER.warning("Category request failed", extra={"url": url, "status": response.status})
+            LOGGER.warning(response)
             await request.dispose()
             return 0
         body = await response.text()
@@ -37,6 +40,7 @@ async def scrape_api(db_path, url: str) -> int:
     keywords = get_title_keywords()
     matches = 0
     LOGGER.info("Category response parsed", extra={"items": len(items)})
+    await asyncio.sleep(1)
     for item in items:
         title = str(item.get("title", ""))
         if not title or not any(keyword in title for keyword in keywords):
@@ -87,7 +91,9 @@ async def scrape_thread_pages(db_path, request, thread_id: int, scraped_at: str)
         page_body = await page_response.text()
         page_payload = json.loads(page_body)
         page_response_payload = page_payload.get("response", {})
+        LOGGER.info(f"Processing {page_url}")
         _process_thread_page(db_path, page_response_payload, thread_id, page, scraped_at)
+        await asyncio.sleep(random.randint(5, 10))
 
 
 def _process_thread_page(
@@ -97,14 +103,15 @@ def _process_thread_page(
     target_user_id = get_target_user_id()
     stock_keywords = get_stock_keywords()
     LOGGER.info(
-        "Processing thread page items",
+        f"Processing thread page items: {page}",
         extra={"thread_id": thread_id, "page": page, "items": len(items)},
     )
     for item in items:
-        user_id = int(item.get("user_id", 0))
+        user_id = int(item.get("user", {}).get("user_id", 0))
         post_id = str(item.get("post_id", ""))
         user_nickname = str(item.get("user_nickname", ""))
         msg = str(item.get("msg", ""))
+        LOGGER.info(f"{user_nickname}, {user_id}, {target_user_id}, {user_id == target_user_id}")
         if user_id == target_user_id:
             insert_user_comment(
                 db_path,
@@ -121,26 +128,26 @@ def _process_thread_page(
                 "Stored target user comment",
                 extra={"thread_id": thread_id, "page": page, "post_id": post_id},
             )
-        for stock in stock_keywords:
-            if stock in msg:
-                insert_stock_comment(
-                    db_path,
-                    scraped_at,
-                    stock,
-                    thread_id,
-                    page,
-                    post_id,
-                    user_id,
-                    user_nickname,
-                    msg,
-                    json.dumps(item, ensure_ascii=False),
-                )
-                LOGGER.info(
-                    "Stored stock comment",
-                    extra={
-                        "thread_id": thread_id,
-                        "page": page,
-                        "post_id": post_id,
-                        "stock": stock,
-                    },
-                )
+        # for stock in stock_keywords:
+        #     if stock in msg:
+        #         insert_stock_comment(
+        #             db_path,
+        #             scraped_at,
+        #             stock,
+        #             thread_id,
+        #             page,
+        #             post_id,
+        #             user_id,
+        #             user_nickname,
+        #             msg,
+        #             json.dumps(item, ensure_ascii=False),
+        #         )
+        #         LOGGER.info(
+        #             "Stored stock comment",
+        #             extra={
+        #                 "thread_id": thread_id,
+        #                 "page": page,
+        #                 "post_id": post_id,
+        #                 "stock": stock,
+        #             },
+        #         )
