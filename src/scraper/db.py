@@ -19,6 +19,7 @@ def init_db(db_path: Path) -> None:
             )
             """
         )
+        _ensure_column(conn, "user_comments", "reply_time", "INTEGER NOT NULL DEFAULT 0")
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS user_comments (
@@ -54,6 +55,7 @@ def init_db(db_path: Path) -> None:
             )
             """
         )
+        _ensure_column(conn, "stock_comments", "reply_time", "INTEGER NOT NULL DEFAULT 0")
         conn.commit()
 
 
@@ -153,3 +155,10 @@ def delete_match(db_path: Path, match_id: int) -> None:
     with sqlite3.connect(db_path) as conn:
         conn.execute("DELETE FROM thread_matches WHERE id = ?", (match_id,))
         conn.commit()
+
+
+def _ensure_column(conn: sqlite3.Connection, table: str, column: str, definition: str) -> None:
+    columns = [row[1] for row in conn.execute(f"PRAGMA table_info({table})").fetchall()]
+    if column in columns:
+        return
+    conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
