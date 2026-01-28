@@ -1,0 +1,3 @@
+[console_scripts]
+run-admin = scraper.admin:main
+run-scraper = scraper.app:main
