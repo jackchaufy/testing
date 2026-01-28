@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LangChain Agent Demo</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>LangChain Agent Playground</h1>
+      <p>Toggle tools and chat with the GPT-powered agent.</p>
+    </header>
+    <main class="layout">
+      <section class="panel tools">
+        <h2>Tool Panel</h2>
+        <div id="tool-list" class="tool-list"></div>
+      </section>
+      <section class="panel chat">
+        <h2>Chat Panel</h2>
+        <div id="chat-window" class="chat-window"></div>
+        <form id="chat-form" class="chat-form">
+          <input
+            id="chat-input"
+            type="text"
+            placeholder="Ask the agent to use tools..."
+            autocomplete="off"
+          />
+          <button type="submit">Send</button>
+        </form>
+      </section>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
