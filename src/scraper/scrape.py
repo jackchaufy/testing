@@ -162,10 +162,15 @@ async def _get_with_retry(request, url: str, thread_id: int, page: int):
             extra={
                 "thread_id": thread_id,
                 "page": page,
+                "url": url,
                 "status": response.status,
                 "attempt": attempt,
                 "wait_seconds": round(wait_time, 2),
             },
         )
         await asyncio.sleep(wait_time)
+    LOGGER.error(
+        "Rate limit retries exhausted",
+        extra={"thread_id": thread_id, "page": page, "url": url, "status": response.status},
+    )
     return response
