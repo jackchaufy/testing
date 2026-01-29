@@ -28,6 +28,9 @@ DEFAULT_STOCK_KEYWORDS = [
 ]
 DEFAULT_TARGET_USER_ID = 734436
 THREAD_URL_TEMPLATE = "https://lihkg.com/api_v2/thread/{thread_id}/page/{page}"
+DEFAULT_THREAD_START_PAGES = {
+    4046873: 4,
+}
 
 
 def get_target_url() -> str:
@@ -60,3 +63,7 @@ def get_target_user_id() -> int:
 
 def get_thread_url(thread_id: int, page: int) -> str:
     return THREAD_URL_TEMPLATE.format(thread_id=thread_id, page=page)
+
+
+def get_thread_start_page(thread_id: int) -> int:
+    return DEFAULT_THREAD_START_PAGES.get(thread_id, 1)

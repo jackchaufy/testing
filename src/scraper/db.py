@@ -55,6 +55,14 @@ def init_db(db_path: Path) -> None:
             )
             """
         )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS thread_progress (
+                thread_id INTEGER PRIMARY KEY,
+                last_page INTEGER NOT NULL
+            )
+            """
+        )
         _ensure_column(conn, "stock_comments", "reply_time", "INTEGER NOT NULL DEFAULT 0")
         conn.commit()
 
@@ -154,6 +162,29 @@ def insert_stock_comment(
 def delete_match(db_path: Path, match_id: int) -> None:
     with sqlite3.connect(db_path) as conn:
         conn.execute("DELETE FROM thread_matches WHERE id = ?", (match_id,))
+        conn.commit()
+
+
+def get_thread_progress(db_path: Path, thread_id: int) -> int | None:
+    with sqlite3.connect(db_path) as conn:
+        row = conn.execute(
+            "SELECT last_page FROM thread_progress WHERE thread_id = ?", (thread_id,)
+        ).fetchone()
+    if row is None:
+        return None
+    return int(row[0])
+
+
+def set_thread_progress(db_path: Path, thread_id: int, last_page: int) -> None:
+    with sqlite3.connect(db_path) as conn:
+        conn.execute(
+            """
+            INSERT INTO thread_progress (thread_id, last_page)
+            VALUES (?, ?)
+            ON CONFLICT(thread_id) DO UPDATE SET last_page = excluded.last_page
+            """,
+            (thread_id, last_page),
+        )
         conn.commit()
 
 

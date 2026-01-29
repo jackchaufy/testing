@@ -12,10 +12,17 @@ from scraper.config import (
     get_request_headers,
     get_stock_keywords,
     get_target_user_id,
+    get_thread_start_page,
     get_thread_url,
     get_title_keywords,
 )
-from scraper.db import insert_match, insert_stock_comment, insert_user_comment
+from scraper.db import (
+    get_thread_progress,
+    insert_match,
+    insert_stock_comment,
+    insert_user_comment,
+    set_thread_progress,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -62,12 +69,15 @@ async def _scrape_thread(db_path, thread_id: int, scraped_at: str) -> None:
 
 
 async def scrape_thread_pages(db_path, request, thread_id: int, scraped_at: str) -> None:
-    thread_url = get_thread_url(thread_id, 1)
+    saved_page = get_thread_progress(db_path, thread_id)
+    start_page = saved_page if saved_page is not None else get_thread_start_page(thread_id)
+    start_page = max(1, start_page)
+    thread_url = get_thread_url(thread_id, start_page)
     response = await _get_with_retry(request, thread_url, thread_id, 1)
     if not response.ok:
         LOGGER.warning(
             "Thread page request failed",
-            extra={"thread_id": thread_id, "page": 1, "status": response.status},
+            extra={"thread_id": thread_id, "page": start_page, "status": response.status},
         )
         return
     body = await response.text()
@@ -75,8 +85,9 @@ async def scrape_thread_pages(db_path, request, thread_id: int, scraped_at: str)
     response_payload = payload.get("response", {})
     total_page = int(response_payload.get("total_page", 1))
     LOGGER.info("Thread total pages", extra={"thread_id": thread_id, "total_page": total_page})
-    await _process_thread_page(db_path, response_payload, thread_id, 1, scraped_at)
-    for page in range(2, total_page + 1):
+    await _process_thread_page(db_path, response_payload, thread_id, start_page, scraped_at)
+    set_thread_progress(db_path, thread_id, start_page)
+    for page in range(start_page + 1, total_page + 1):
         page_url = get_thread_url(thread_id, page)
         page_response = await _get_with_retry(request, page_url, thread_id, page)
         if not page_response.ok:
@@ -89,6 +100,7 @@ async def scrape_thread_pages(db_path, request, thread_id: int, scraped_at: str)
         page_payload = json.loads(page_body)
         page_response_payload = page_payload.get("response", {})
         await _process_thread_page(db_path, page_response_payload, thread_id, page, scraped_at)
+        set_thread_progress(db_path, thread_id, page)
 
 
 async def _process_thread_page(
