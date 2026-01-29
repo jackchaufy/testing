@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import asyncio
 import datetime as dt
 import json
 import logging
-import asyncio
+import random
 
 from playwright.async_api import async_playwright
 
@@ -74,7 +75,7 @@ async def scrape_thread_pages(db_path, request, thread_id: int, scraped_at: str)
     response_payload = payload.get("response", {})
     total_page = int(response_payload.get("total_page", 1))
     LOGGER.info("Thread total pages", extra={"thread_id": thread_id, "total_page": total_page})
-    _process_thread_page(db_path, response_payload, thread_id, 1, scraped_at)
+    await _process_thread_page(db_path, response_payload, thread_id, 1, scraped_at)
     for page in range(2, total_page + 1):
         page_url = get_thread_url(thread_id, page)
         page_response = await request.get(page_url)
@@ -87,10 +88,10 @@ async def scrape_thread_pages(db_path, request, thread_id: int, scraped_at: str)
         page_body = await page_response.text()
         page_payload = json.loads(page_body)
         page_response_payload = page_payload.get("response", {})
-        _process_thread_page(db_path, page_response_payload, thread_id, page, scraped_at)
+        await _process_thread_page(db_path, page_response_payload, thread_id, page, scraped_at)
 
 
-def _process_thread_page(
+async def _process_thread_page(
     db_path, response_payload: dict, thread_id: int, page: int, scraped_at: str
 ) -> None:
     items = response_payload.get("item_data", [])
@@ -147,3 +148,4 @@ def _process_thread_page(
                         "stock": stock,
                     },
                 )
+    await asyncio.sleep(random.uniform(5, 10))
