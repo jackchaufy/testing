@@ -99,6 +99,7 @@ Additional pages:
 
 - `http://localhost:8000/user-comments` for comments from the target user.
 - `http://localhost:8000/stock-comments` for comments grouped by stock keywords.
+- `http://localhost:8000/thread-progress` for last scraped page per thread.
 
 The scraper will:
 

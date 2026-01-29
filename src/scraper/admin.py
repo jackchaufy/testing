@@ -24,6 +24,7 @@ def home() -> str:
                 _render_link_row("/matches", "Matched threads"),
                 _render_link_row("/user-comments", "Comments from target user"),
                 _render_link_row("/stock-comments", "Comments grouped by stock"),
+                _render_link_row("/thread-progress", "Thread scrape progress"),
             ]
         ),
     )
@@ -92,6 +93,17 @@ def stock_comments() -> str:
         table_rows,
     )
 
+
+@app.get("/thread-progress", response_class=HTMLResponse)
+def thread_progress() -> str:
+    db_path = get_db_path()
+    rows = _fetch_thread_progress(db_path)
+    table_rows = "\n".join(_render_thread_progress_row(*row) for row in rows)
+    return _render_table_page(
+        "Thread Progress",
+        ["Thread ID", "Last Page"],
+        table_rows,
+    )
 
 @app.post("/delete/{match_id}")
 def delete_match_row(match_id: int) -> RedirectResponse:
@@ -191,6 +203,19 @@ def _fetch_stock_comments(db_path):
         ).fetchall()
 
 
+def _fetch_thread_progress(db_path):
+    import sqlite3
+
+    with sqlite3.connect(db_path) as conn:
+        return conn.execute(
+            """
+            SELECT thread_id, last_page
+            FROM thread_progress
+            ORDER BY thread_id ASC
+            """
+        ).fetchall()
+
+
 def _render_user_comment_row(
     row_id: int,
     scraped_at: str,
@@ -241,6 +266,15 @@ def _render_stock_comment_row(
         f"<td>{html.escape(user_nickname)}</td>"
         f"<td>{reply_time}</td>"
         f"<td><pre>{html.escape(msg)}</pre></td>"
+        "</tr>"
+    )
+
+
+def _render_thread_progress_row(thread_id: int, last_page: int) -> str:
+    return (
+        "<tr>"
+        f"<td>{thread_id}</td>"
+        f"<td>{last_page}</td>"
         "</tr>"
     )
 
