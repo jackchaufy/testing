@@ -63,7 +63,7 @@ async def _scrape_thread(db_path, thread_id: int, scraped_at: str) -> None:
 
 async def scrape_thread_pages(db_path, request, thread_id: int, scraped_at: str) -> None:
     thread_url = get_thread_url(thread_id, 1)
-    response = await request.get(thread_url)
+    response = await _get_with_retry(request, thread_url, thread_id, 1)
     if not response.ok:
         LOGGER.warning(
             "Thread page request failed",
@@ -78,7 +78,7 @@ async def scrape_thread_pages(db_path, request, thread_id: int, scraped_at: str)
     await _process_thread_page(db_path, response_payload, thread_id, 1, scraped_at)
     for page in range(2, total_page + 1):
         page_url = get_thread_url(thread_id, page)
-        page_response = await request.get(page_url)
+        page_response = await _get_with_retry(request, page_url, thread_id, page)
         if not page_response.ok:
             LOGGER.warning(
                 "Thread page request failed",
@@ -149,3 +149,23 @@ async def _process_thread_page(
                     },
                 )
     await asyncio.sleep(random.uniform(5, 10))
+
+
+async def _get_with_retry(request, url: str, thread_id: int, page: int):
+    for attempt in range(1, 4):
+        response = await request.get(url)
+        if response.status not in (403, 429):
+            return response
+        wait_time = random.uniform(10, 20) * attempt
+        LOGGER.warning(
+            "Rate limit response, backing off",
+            extra={
+                "thread_id": thread_id,
+                "page": page,
+                "status": response.status,
+                "attempt": attempt,
+                "wait_seconds": round(wait_time, 2),
+            },
+        )
+        await asyncio.sleep(wait_time)
+    return response
