@@ -33,7 +33,11 @@ async def scrape_api(db_path, url: str) -> int:
         )
         response = await request.get(url)
         if not response.ok:
-            LOGGER.warning("Category request failed", extra={"url": url, "status": response.status})
+            error_body = await _read_error_body(response)
+            LOGGER.warning(
+                "Category request failed",
+                extra={"url": url, "status": response.status, "error_body": error_body},
+            )
             await request.dispose()
             return 0
         body = await response.text()
@@ -75,9 +79,15 @@ async def scrape_thread_pages(db_path, request, thread_id: int, scraped_at: str)
     thread_url = get_thread_url(thread_id, start_page)
     response = await _get_with_retry(request, thread_url, thread_id, 1)
     if not response.ok:
+        error_body = await _read_error_body(response)
         LOGGER.warning(
             "Thread page request failed",
-            extra={"thread_id": thread_id, "page": start_page, "status": response.status},
+            extra={
+                "thread_id": thread_id,
+                "page": start_page,
+                "status": response.status,
+                "error_body": error_body,
+            },
         )
         return
     body = await response.text()
@@ -91,9 +101,15 @@ async def scrape_thread_pages(db_path, request, thread_id: int, scraped_at: str)
         page_url = get_thread_url(thread_id, page)
         page_response = await _get_with_retry(request, page_url, thread_id, page)
         if not page_response.ok:
+            error_body = await _read_error_body(page_response)
             LOGGER.warning(
                 "Thread page request failed",
-                extra={"thread_id": thread_id, "page": page, "status": page_response.status},
+                extra={
+                    "thread_id": thread_id,
+                    "page": page,
+                    "status": page_response.status,
+                    "error_body": error_body,
+                },
             )
             continue
         page_body = await page_response.text()
@@ -168,6 +184,7 @@ async def _get_with_retry(request, url: str, thread_id: int, page: int):
         response = await request.get(url)
         if response.status not in (403, 429):
             return response
+        error_body = await _read_error_body(response)
         wait_time = random.uniform(10, 20) * attempt
         LOGGER.warning(
             "Rate limit response, backing off",
@@ -176,6 +193,7 @@ async def _get_with_retry(request, url: str, thread_id: int, page: int):
                 "page": page,
                 "url": url,
                 "status": response.status,
+                "error_body": error_body,
                 "attempt": attempt,
                 "wait_seconds": round(wait_time, 2),
             },
@@ -183,6 +201,20 @@ async def _get_with_retry(request, url: str, thread_id: int, page: int):
         await asyncio.sleep(wait_time)
     LOGGER.error(
         "Rate limit retries exhausted",
-        extra={"thread_id": thread_id, "page": page, "url": url, "status": response.status},
+        extra={
+            "thread_id": thread_id,
+            "page": page,
+            "url": url,
+            "status": response.status,
+            "error_body": await _read_error_body(response),
+        },
     )
     return response
+
+
+async def _read_error_body(response) -> str:
+    try:
+        body = await response.text()
+    except Exception:
+        return "<unavailable>"
+    return body[:1000]
