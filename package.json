@@ -1,0 +1,11 @@
+{
+  "name": "proximity-sprint1",
+  "version": "0.1.0",
+  "description": "Sprint 1 MVP for Proximity family office platform",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "test": "node --test"
+  }
+}
